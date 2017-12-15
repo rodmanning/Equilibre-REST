@@ -1,18 +1,29 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from transactions.models import PaymentMethod, Transaction
+from transactions.models import Category, Account, Transaction
 
 
-class PaymentMethodSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     """
-    Serializer for PaymentMethod objects.
+    Serializer for Category objects.
+
+    """
+    class Meta:
+        model = Category
+        fields = ("name",)
+        read_only_fields = fields
+
+
+class AccountSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Account objects.
 
     """
 
     icon = serializers.SerializerMethodField()
 
     class Meta:
-        model = PaymentMethod
+        model = Account
         fields = (
             "name",
             "abbreviation",
@@ -66,7 +77,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     """
 
     user = UserSerializer()
-    method = PaymentMethodSerializer()
+    account = AccountSerializer()
     created_by = serializers.SerializerMethodField()
     updated_by = serializers.SerializerMethodField()
 
@@ -75,7 +86,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = (
             "user",
-            "method",
+            "account",
             "created",
             "created_by",
             "updated",
@@ -94,8 +105,11 @@ class TransactionSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         data["user"] = User.objects.get(id=data["user"])
 
-        data["method"] = PaymentMethod.objects.get(
-            id=data["method"])
+        data["account"] = Account.objects.get(
+            id=data["account"])
+
+        data["category"] = Category.objects.get(
+            id=data["category"])
 
         return data
 

@@ -1,19 +1,33 @@
 from rest_framework import viewsets, mixins
-from transactions.models import PaymentMethod, Transaction
-from transactions.serializers import PaymentMethodSerializer
+from transactions.models import Account, Category, Transaction
+from transactions.serializers import AccountSerializer
 from transactions.serializers import TransactionSerializer
+from transactions.serializers import CategorySerializer
 
 
-class PaymentMethodViewSet(viewsets.ReadOnlyModelViewSet):
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Views for PaymentMethod objects.
+    Views for Category objects.
 
     :methods: GET
 
     """
-    queryset = PaymentMethod.objects.filter(
+    queryset = Category.objects.filter(
         is_active=True)
-    serializer_class = PaymentMethodSerializer
+    serializer_class = CategorySerializer
+    pagination_class = None
+
+
+class AccountViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Views for Account objects.
+
+    :methods: GET
+
+    """
+    queryset = Account.objects.filter(
+        is_active=True)
+    serializer_class = AccountSerializer
     pagination_class = None
 
 

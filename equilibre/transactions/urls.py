@@ -3,9 +3,14 @@ import transactions.views as views
 
 router = routers.DefaultRouter()
 router.register(
-    r'payment_methods',
-    views.PaymentMethodViewSet,
-    base_name='payment_methods'
+    r'category',
+    views.CategoryViewSet,
+    base_name='category',
+)
+router.register(
+    r'accounts',
+    views.AccountViewSet,
+    base_name='accounts'
 )
 router.register(
     r'transactions',

@@ -56,7 +56,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'SoldeLibre.urls'
+ROOT_URLCONF = 'equilibre.urls'
 
 TEMPLATES = [
     {
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'SoldeLibre.wsgi.application'
+WSGI_APPLICATION = 'equilibre.wsgi.application'
 
 
 # Database
