@@ -1,7 +1,8 @@
 from django.contrib import admin
-from transactions.models import Category, Account, Transaction
+from transactions.models import Account, Balance, Category, Transaction
 
 admin.site.register(Category)
+admin.site.register(Balance)
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
@@ -12,6 +13,7 @@ class AccountAdmin(admin.ModelAdmin):
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ("user", "date", "amount", "account", "updated_by")
+    list_display = ("id", "user", "date", "amount", "account", "tax_deduction", "updated_by")
     list_filter = ("user", "date", "account", "updated_by")
     list_search = ("description",)
+    readonly_fields = ("user", "updated", "updated_by", "created", "created_by")

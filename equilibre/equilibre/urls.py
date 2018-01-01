@@ -16,9 +16,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework.documentation import include_docs_urls
+# simple-jwt
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'docs/', include_docs_urls(title='Equilibre API')),
     path('api/', include('transactions.urls')),
+    # simple-jwt
+    re_path(r'^api/token/$', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    re_path(r'^api/token/refresh/$', TokenRefreshView.as_view(), name='token_refresh'),
+    re_path(r'^api/token/verify/$', TokenVerifyView.as_view(), name='token_verify'),
 ]

@@ -1,35 +1,30 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from transactions.models import Category, Account, Transaction
+from transactions.models import Account, Balance, Category, Transaction
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    """
-    Serializer for Category objects.
-
-    """
+    """Serializer for Category objects."""
     class Meta:
         model = Category
-        fields = ("name",)
+        fields = ("id", "name",)
         read_only_fields = fields
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Account objects.
-
-    """
-
+    """Serializer for Account objects."""
     icon = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
         fields = (
+            "id",
             "name",
             "abbreviation",
             "icon",
         )
         read_only_fields = (
+            "id",
             "name",
             "abbreviation",
             "icon",
@@ -37,14 +32,11 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
     def get_icon(self, obj):
-        return obj.icon.path
+        return obj.icon.url
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Serializer for User objects.
-
-    """
+    """Serializer for User objects."""
     full_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -64,26 +56,35 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
         )
 
-
-
     def get_full_name(self, obj):
         return obj.get_full_name()
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Transaction objects.
-
-    """
-
-    user = UserSerializer()
-    account = AccountSerializer()
-    created_by = serializers.SerializerMethodField()
-    updated_by = serializers.SerializerMethodField()
+    """Serializer for Transaction objects."""
+    user = UserSerializer(read_only=True)
+    user_id = serializers.IntegerField(write_only=True)
+    account = AccountSerializer(read_only=True)
+    account_id = serializers.IntegerField(write_only=True)
+    category = CategorySerializer(read_only=True)
+    category_id = serializers.IntegerField(write_only=True)
+    created_by = serializers.SerializerMethodField(read_only=True)
+    updated_by = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Transaction
-        fields = "__all__"
+        fields = (
+            "id",
+            "user", "user_id",
+            "account", "account_id",
+            "date",
+            "action", "amount",
+            "category", "category_id",
+            "description",
+            "tax_deduction",
+            "created", "created_by",
+            "updated", "updated_by"
+        )
         read_only_fields = (
             "user",
             "account",
@@ -95,32 +96,37 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
     def get_created_by(self, obj):
+        """Return the value for the `created_by` field."""
         return obj.created_by.username
-
 
     def get_updated_by(self, obj):
+        """Return the value for the `updated_by` field."""
         return obj.created_by.username
 
+    def _handle_related_fields(self, validated_data):
+        """Handle fields for writable related objects.
 
-    def to_internal_value(self, data):
-        data["user"] = User.objects.get(id=data["user"])
+        :account_id: The `pk` of the related account
 
-        data["account"] = Account.objects.get(
-            id=data["account"])
+        :category_id: The `pk` of the related category.
 
-        data["category"] = Category.objects.get(
-            id=data["category"])
+        :return: The `validated_data` object, with the values `account` and
+                 `category` fields replaced by the applicable related objects.
 
-        return data
+        """
+        validated_data["account"] = Account.objects.get(
+            id=validated_data["account_id"])
+        validated_data["category"] = Category.objects.get(
+            id=validated_data["category_id"])
+        validated_data["user"] = User.objects.get(id=1)
+
+        return validated_data
 
 
     def create(self, validated_data):
-        """
-        Custom `create()` method to set the `created_by` value.
-
-        """
-        #self.handle_writable_nested_fields(validated_data)
-        instance = Transaction(**validated_data)
+        """Custom `create()` method to set the `created_by` value."""
+        _data = self._handle_related_fields(validated_data)
+        instance = Transaction(**_data)
         instance.created_by = self.context['request'].user
         instance.updated_by = self.context['request'].user
         instance.save()
@@ -128,14 +134,22 @@ class TransactionSerializer(serializers.ModelSerializer):
         return instance
 
 
-    def update(self, instance, **validated_data):
-        """
-        Custom `update()` method to set the `updated_by` value
+    def update(self, instance, validated_data):
+        """Custom `update()` method to set the `updated_by` value."""
 
-        """
-        for key,val in validated_data.items():
-            instance[key] = val
-        instance.updated_by = self.request.user
+        _data = self._handle_related_fields(validated_data)
+        for attr, val in _data.items():
+            setattr(instance, attr, val)
+        instance.updated_by = self.context['request'].user
         instance.save()
 
         return instance
+
+
+class BalanceSerializer(serializers.ModelSerializer):
+    """Read-only serializer for account Balance objects."""
+    account = AccountSerializer(read_only=True)
+
+    class Meta:
+        model = Balance
+        fields = "__all__"

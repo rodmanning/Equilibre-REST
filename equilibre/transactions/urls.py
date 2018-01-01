@@ -15,7 +15,12 @@ router.register(
 router.register(
     r'transactions',
     views.TransactionViewSet,
-    base_name='transaction'
+    base_name='transactions'
+)
+router.register(
+    r'balances',
+    views.BalanceViewSet,
+    base_name='balances'
 )
 
 urlpatterns = router.urls

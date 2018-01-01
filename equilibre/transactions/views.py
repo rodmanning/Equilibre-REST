@@ -1,13 +1,13 @@
 from rest_framework import viewsets, mixins
-from transactions.models import Account, Category, Transaction
+from transactions.models import Account, Balance, Category, Transaction
 from transactions.serializers import AccountSerializer
 from transactions.serializers import TransactionSerializer
 from transactions.serializers import CategorySerializer
+from transactions.serializers import BalanceSerializer
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Views for Category objects.
+    """Views for Category objects.
 
     :methods: GET
 
@@ -19,8 +19,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class AccountViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Views for Account objects.
+    """Views for Account objects.
 
     :methods: GET
 
@@ -32,19 +31,26 @@ class AccountViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
-    """
-    Views for Transaction objects.
+    """Views for Transaction objects.
 
     :methods: GET, POST, PATCH
 
     """
-
     serializer_class = TransactionSerializer
 
     def get_queryset(self):
         if self.request.user.has_perm("transaction.view"):
             return Transaction.objects.all()
         else:
-            return Transaction.objects.filter(
-                user=self.request.user,
-            )
+            return Transaction.objects.filter(user=self.context['request'].user)
+
+
+class BalanceViewSet(viewsets.ReadOnlyModelViewSet):
+    """Views for account Balance objects.
+
+    :methods: GET
+
+    """
+    queryset = Balance.objects.all()
+    serializer_class = BalanceSerializer
+    pagination_class = None
