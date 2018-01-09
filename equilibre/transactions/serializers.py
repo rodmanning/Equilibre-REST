@@ -94,6 +94,14 @@ class TransactionSerializer(serializers.ModelSerializer):
             "updated_by"
         )
 
+    def __init__(self, *args, **kwargs):
+        """Override __init__ method to set custom validation messages."""
+        super(TransactionSerializer, self).__init__(*args, **kwargs)
+        self.fields["category_id"].error_messages["invalid"] = "You must select a category."
+        self.fields["account_id"].error_messages["invalid"] = "You must select an account."
+        self.fields["amount"].error_messages["invalid"] = "You must enter a valid amount."
+        self.fields["action"].error_messages["invalid_choice"] = "Select an action."
+        self.fields["date"].error_messages["invalid"] = "You must enter a valid date (try YYYY-MM-DD)."
 
     def get_created_by(self, obj):
         """Return the value for the `created_by` field."""
