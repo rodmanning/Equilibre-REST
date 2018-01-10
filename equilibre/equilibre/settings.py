@@ -10,27 +10,35 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
+# Note:
+#
+#     The follow settings stored in the server-specific settings file stored
+#     in the /config directory:
+#
+#     - SECRET_KEY
+#     - DEBUG
+#     - DATABASE
+#     - ALLOWED_HOSTS
+#     - WSGI_APPLICATION
+#     - ADMINS and MANAGERS
+#     - DRF settings (DEFAULT_RENDERED_CLASSES, REST_FRAMEWORK)
+#     - STATIC_ROOT
+#     - EMAIL_BACKEND and email authentication settings
+#
+#     This server-specific configuration file must NOT be placed under version
+#     control. In addition, it should receive more restrictive file-system
+#     permissions (e.g read/write for user only)
+
 import os
 from datetime import timedelta
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+# Import local, server-specific settings (used for secure settings)
+#
+# Change this import to point to your actual server configuration
+from .config.settings_demo import *
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'nj(l&=_-+$i)sjdp=&xa=k)tr5pnp*9xyxz0degxwny)&90e^j'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = [
-    'localhost',
-    '192.168.178.31' # Trish local network
-]
-
 
 # Application definition
 
@@ -80,20 +88,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'equilibre.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
 
@@ -125,45 +119,3 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.0/howto/static-files/
-
-STATIC_URL = '/static/'
-
-REST_FRAMEWORK = {
-    # Authentication
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-    # Pagination
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 50,
-    # Filtering
-    #"DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
-}
-
-from corsheaders.defaults import default_headers
-
-CORS_ALLOW_HEADERS = default_headers + (
-    'access-control-allow-origin',
-    'access-control-expose-headers',
-)
-
-CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ORIGIN_WHITELIST = (
-#     'localhost:8080',
-#     '127.0.0.1:9080',
-#     '192.168.178.31:8000', # Trish home network
-# )
-
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-}
